@@ -5,7 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
+
 
 @Entity
 @Data
@@ -17,11 +18,11 @@ public class Movement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Client client;
+    @Column(name = "client_id")
+    private Long clientId;
 
-    @ManyToOne
-    private MovementType movementType;
+    @Column(name = "movement_type_id")
+    private Long movementTypeId;
 
     @Column(name = "account_number")
     private String accountNumber;

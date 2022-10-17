@@ -3,16 +3,19 @@ package com.moabits.api.controllers;
 import com.moabits.api.services.ClientService;
 import com.moabits.api.services.MovementService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +23,12 @@ import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class MovementController {
     private final MovementService movementService;
     private final ClientService clientService;
+    private final JobLauncher jobLauncher;
+    private final Job job;
 
     @GetMapping("/movement/list")
     public ResponseEntity getListByClientId(
@@ -68,9 +74,20 @@ public class MovementController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("/movement/csv")
-    public ResponseEntity uploadCsvFile(@RequestParam("csvFile") MultipartFile multipartFile) throws IOException {
-        return ResponseEntity.ok().build();
+    @GetMapping("/movement/batch")
+    public BatchStatus load() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+        Map<String, JobParameter> maps = new HashMap<>();
+        maps.put("time", new JobParameter(System.currentTimeMillis()));
+
+        JobParameters parameters = new JobParameters(maps);
+        JobExecution jobExecution = jobLauncher.run(job, parameters);
+
+        log.info("JobExecution: {}", jobExecution.getStatus());
+        log.info("Batch is running...");
+        while (jobExecution.isRunning()) {
+            log.info("...");
+        }
+        return jobExecution.getStatus();
     }
 
     public void assertClientExists(Long clientId) {
