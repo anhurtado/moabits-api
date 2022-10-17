@@ -45,8 +45,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     filterChain.doFilter(request, response);
                 } catch (Exception exception) {
                     log.error("Error loggin in: {}", exception.getMessage());
-
-                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
                     Map<String, String> error = new HashMap<>();
                     error.put("error_message", exception.getMessage());

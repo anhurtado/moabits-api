@@ -52,4 +52,19 @@ public class MovementService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Field fromDate or toDate is required on this format YYYY-MM-DD");
         }
     }
+
+    public Long getTotalByClientId(Long clientId) {
+        return movementRepository.getTotalByClientId(clientId);
+    }
+
+    public Long getTotalByClientIdAndDates(Long clientId, String fromDate, String toDate) {
+        try {
+            Date fDate = new SimpleDateFormat("yyyy-MM-dd").parse(fromDate);
+            Date tDate = new SimpleDateFormat("yyyy-MM-dd").parse(toDate);
+            return movementRepository.getTotalByClientIdAndDates(clientId, fDate, tDate);
+        } catch (ParseException parseException) {
+            log.error(parseException.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Field fromDate or toDate is required on this format YYYY-MM-DD");
+        }
+    }
 }

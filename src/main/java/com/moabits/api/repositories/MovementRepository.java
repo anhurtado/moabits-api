@@ -32,6 +32,9 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
         @Param("limit") Long limit,
         @Param("page") Long page);
 
+    @Query(value = "SELECT count(m.id) total FROM movements m WHERE m.client_id = :clientId", nativeQuery = true)
+    Long getTotalByClientId(@Param("clientId") Long clientId);
+
     @Query(value = "SELECT m.id, m.account_number, m.amount, m.created_at, m.balance, mt.name FROM movements m " +
         "JOIN movement_types mt ON m.movement_type_id = mt.id " +
         "WHERE m.client_id = :clientId AND m.created_at BETWEEN :createdAtStart AND :createdAtEnd " +
@@ -42,4 +45,10 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
         @Param("createdAtEnd") Date createdAtEnd,
         @Param("limit") Long limit,
         @Param("page") Long page);
+
+    @Query(value = "SELECT count(m.id) total FROM movements m WHERE m.client_id = :clientId AND m.created_at BETWEEN :createdAtStart AND :createdAtEnd", nativeQuery = true)
+    Long getTotalByClientIdAndDates(
+        @Param("clientId") Long clientId,
+        @Param("createdAtStart") Date createdAtStart,
+        @Param("createdAtEnd") Date createdAtEnd);
 }
